@@ -12,6 +12,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+import Navigation from '@/components/Navigation';
+
 export const metadata: Metadata = {
   title: "Application Tracker | Manage Your Job Search",
   description: "A premium job application tracking system to manage, organize, and monitor your job search process.",
@@ -25,6 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <Navigation />
         {children}
       </body>
     </html>

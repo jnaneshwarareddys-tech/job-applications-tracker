@@ -1,16 +1,14 @@
 import { useState, useEffect } from 'react';
 import { JobApplication } from '@/types';
 
-const STORAGE_KEY = 'job_applications';
-
-export function useJobs() {
+export function useJobs(storageKey: string = 'job_applications') {
   const [jobs, setJobs] = useState<JobApplication[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Load on mount
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const stored = localStorage.getItem(storageKey);
       if (stored) {
         setJobs(JSON.parse(stored));
       }
@@ -19,13 +17,13 @@ export function useJobs() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [storageKey]);
 
   // Save changes wrapper
   const persistJobs = (newJobs: JobApplication[]) => {
     setJobs(newJobs);
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newJobs));
+      localStorage.setItem(storageKey, JSON.stringify(newJobs));
     } catch (e) {
       console.error('Failed to save to localStorage', e);
     }
