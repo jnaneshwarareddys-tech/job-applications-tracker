@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import Redis from 'ioredis';
 
+export const dynamic = 'force-dynamic';
+
 const getRedis = () => {
   const url = process.env.REDIS_URL || process.env.KV_URL;
   if (url) {
@@ -26,8 +28,8 @@ export async function GET(request: Request) {
     const dataString = await redis.get(key);
     const data = dataString ? JSON.parse(dataString) : [];
     
-    // Close connection gracefully if running in serverless environment
-    redis.quit();
+    // Critical: await the quit so Vercel doesn't freeze the socket before flushing
+    await redis.quit();
     
     return NextResponse.json(data);
   } catch (error) {
@@ -55,7 +57,8 @@ export async function POST(request: Request) {
     // Save the entire array to Redis under the given key
     await redis.set(key, JSON.stringify(data));
     
-    redis.quit();
+    // Critical: await the quit so Vercel doesn't freeze the socket before saving
+    await redis.quit();
     
     return NextResponse.json({ success: true });
   } catch (error) {

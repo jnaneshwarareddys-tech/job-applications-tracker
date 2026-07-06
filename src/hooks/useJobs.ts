@@ -9,7 +9,7 @@ export function useJobs(storageKey: string = 'job_applications') {
   const loadData = async () => {
     try {
       // 1. Try to load from Cloud API
-      const res = await fetch(`/api/db?key=${storageKey}`);
+      const res = await fetch(`/api/db?key=${storageKey}`, { cache: 'no-store' });
       if (res.ok) {
         const cloudData = await res.json();
         if (cloudData && cloudData.length > 0) {
