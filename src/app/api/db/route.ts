@@ -1,15 +1,11 @@
 import { NextResponse } from 'next/server';
-import { Redis } from '@upstash/redis';
+import Redis from 'ioredis';
 
-// Initialize optionally so it doesn't crash builds or local environments without KV
 const getRedis = () => {
-  const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
-
-  if (url && token) {
-    return new Redis({ url, token });
+  const url = process.env.REDIS_URL || process.env.KV_URL;
+  if (url) {
+    return new Redis(url);
   }
-  
   return null;
 };
 
@@ -27,8 +23,13 @@ export async function GET(request: Request) {
       return NextResponse.json([], { status: 200 });
     }
 
-    const data = await redis.get(key);
-    return NextResponse.json(data || []);
+    const dataString = await redis.get(key);
+    const data = dataString ? JSON.parse(dataString) : [];
+    
+    // Close connection gracefully if running in serverless environment
+    redis.quit();
+    
+    return NextResponse.json(data);
   } catch (error) {
     console.error('Redis GET Error:', error);
     return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
@@ -52,7 +53,9 @@ export async function POST(request: Request) {
     const { data } = await request.json();
     
     // Save the entire array to Redis under the given key
-    await redis.set(key, data);
+    await redis.set(key, JSON.stringify(data));
+    
+    redis.quit();
     
     return NextResponse.json({ success: true });
   } catch (error) {
