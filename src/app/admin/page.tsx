@@ -36,6 +36,7 @@ export default function AdminDashboard() {
   const handleEdit = (job: JobApplication) => {
     setEditingJob(job);
     setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleLogin = (e: React.FormEvent) => {
